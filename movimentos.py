@@ -6,8 +6,8 @@ from datetime import datetime
 
 def tipo(valor: float):
     while True:
-        tipo_escolha: str = continuar(print_continuar=f"---- ADICIONAR MOVIMENTO ----\nDigite um valor: {float(valor)}", pergunta="Digite o Tipo ['Gasto' ou 'Reccebido']: ".strip().title(), mostrar=True)
-        if tipo_escolha not in ['Gasto', 'Recebido']:
+        tipo_escolha: str = continuar(print_continuar=f"---- ADICIONAR MOVIMENTO ----\nDigite um valor: {float(valor)}", pergunta="Digite o Tipo ['Gasto' ou 'Reccebido']: ", mostrar=True)
+        if tipo_escolha.strip().title() not in ['Gasto', 'Recebido']:
             continuar_infinito("---- NÃO ESTA NAS OPÇÕES ----\n")
             continue
         return tipo_escolha
@@ -15,7 +15,7 @@ def tipo(valor: float):
 def continuacao():
     while True:
         limpar()
-        escolha: str = input("\n---- DESEJA CONTINUAR ----\n\n[Y/N]: ").strip().upper()
+        escolha: str = input("---- DESEJA CONTINUAR ----\n\n[Y/N]: ").strip().upper()
         if escolha not in ["Y", "N"]:
             continue
         return escolha
@@ -34,7 +34,7 @@ def menu(utilizador):
         if escolha == 1:
             while True:
                 try:
-                    valor_escolha: float = float(continuar(print_continuar="---- ADICIONAR MOVIMENTO ----", pergunta="Digite o Valor: ", mostrar=True))
+                    valor_escolha: float = float(continuar(print_continuar="---- ADICIONAR MOVIMENTO ----", pergunta="Digite um valor: ", mostrar=True))
                 except ValueError:
                     continue
 
@@ -49,14 +49,14 @@ def menu(utilizador):
                 p = Cliente(id_conta=utilizador.id, valor=valor_escolha, tipo=tipo_escolha, categoria=categoria_escolha, descricao=descricao_escolha, data=datetime.today())
                 sessao.add(p)
                 sessao.commit()
-                continuar_infinito("\n---- MOVIMENTO ADICIONADO COM SUCESSO ----\n")
+                continuar_infinito("---- MOVIMENTO ADICIONADO COM SUCESSO ----\n")
                 return
             
         elif escolha == 2:
             limpar()
             cliente = sessao.query(Cliente).filter_by(id_conta=utilizador.id).all()
             if not cliente:
-                continuar_infinito("\n---- NENHUMA COMPRA ASSOCIADA NA SUA CONTA ----\n")
+                continuar_infinito("---- NENHUMA COMPRA ASSOCIADA NA SUA CONTA ----\n")
                 continue
             while True:
                 limpar()
@@ -64,7 +64,7 @@ def menu(utilizador):
                 for compra in cliente:
                     numero += 1
                     formato: str = str(compra.data)
-                    print(f"---- COMPRA {numero} ----\nValor: {compra.valor}\nTipo: {compra.tipo}\nCategoria: {compra.categoria}\nDescrição: {compra.descricao}\nData: {formato[0:2]}-{formato[2:4]}-{formato[4:6]}\n")
+                    print(f"---- COMPRA {numero} ----\nValor: {compra.valor}\nTipo: {compra.tipo}\nCategoria: {compra.categoria}\nDescrição: {compra.descricao}\nData: {formato[0:10]}\n")
 
                 continuar_escolha: str = continuar_infinito(frase="---- DESEJA CONTINUAR ----\n", limpar=False, infinito=False)
                 if continuar_escolha == "y" or continuar_escolha == "Y":

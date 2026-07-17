@@ -10,10 +10,10 @@ def verificar(email_cliente: str):
     email_procura = sessao.execute(select(Banco).where(Banco.email == email_cliente)).scalar_one_or_none()
     email_procura_bloqueado = sessao.execute(select(Emails_bloqueado).where(Emails_bloqueado.email == email_cliente)).scalar_one_or_none()
     if email_procura is not None:
-        continuar_infinito(frase="\n---- EMAIL JÁ ESTA SENDO UTILIZADO ----\n")
+        continuar_infinito(frase="---- EMAIL JÁ ESTA SENDO UTILIZADO ----\n")
         return True
     if email_procura_bloqueado is not None:
-        continuar_infinito(frase="\n---- EMAIL ESTÁ BLOQUEADO ----\n")
+        continuar_infinito(frase="---- EMAIL ESTÁ BLOQUEADO ----\n")
         return True
 
 def idade_insufeciente(email_cliente: str, idade_cliente: int):
@@ -21,11 +21,17 @@ def idade_insufeciente(email_cliente: str, idade_cliente: int):
     if email_procura is None and idade_cliente >= 18 and idade_cliente < 100:
         return False
     
+    if idade_cliente > 100:
+        p = Emails_bloqueado(email=email_cliente, idade=idade_cliente, ano=datetime.now().year - idade_cliente)
+        sessao.add(p)
+        sessao.commit()
+        continuar_infinito(frase=f"---- TENS MUITA IDADE (So podias criar conta com este email em: ({p.ano}) ----\n")
+    
     if email_procura is None:
         p = Emails_bloqueado(email=email_cliente, idade=idade_cliente, ano=(18 - idade_cliente) + datetime.now().year)
         sessao.add(p)
         sessao.commit()
-        continuar_infinito(frase=f"\n---- NÃO TENS IDADE SUFECIENTE (So podes criar conta com este email em: ({p.ano}) ----\n")
+        continuar_infinito(frase=f"---- NÃO TENS IDADE SUFECIENTE (So podes criar conta com este email em: ({p.ano}) ----\n")
     return True
 
 def pedir_idade(nome: str, email: str):
@@ -33,11 +39,13 @@ def pedir_idade(nome: str, email: str):
         try:
             resposta: int = int(input("Digite sua idade: "))
         except ValueError:
-            continuar(print_continuar="\n---- SUA IDADE NÃO É UM NUMERO ----\n", pergunta="", mostrar=True, mostrar_pergunta=False)
+            continuar(print_continuar="---- SUA IDADE NÃO É UM NUMERO ----\n", pergunta="", mostrar=True, mostrar_pergunta=False)
+            continue
+        if resposta < 0:
+            continuar(print_continuar="---- SUA IDADE NÃO PODE SER MENOR QUE ZERO ----\n", pergunta="", mostrar=True, mostrar_pergunta=False)
             continue
         menor_idade: bool = idade_insufeciente(email_cliente=email, idade_cliente=resposta)
         if menor_idade:
-            continuar_infinito(frase="\n---- IDADE FALSA ----\n")
             return 1
         continuar(print_continuar=f"---- CRIAR CONTA ----\nDigite o seu nome: {nome[0]}\nDigite seu email: {email}\nDigite sua idade: {resposta}", pergunta="", mostrar=True, mostrar_pergunta=False)
         return resposta
@@ -67,6 +75,8 @@ def menu_inicial():
         if escolha_inicial == 1:
             while True:
                 nome_conta: str = continuar(print_continuar="---- CRIAR CONTA ----", pergunta="Digite o seu nome: ", mostrar=True).title().split()
+                limpar()
+                print(f"---- CRIAR CONTA ----\nDigite o seu nome: {nome_conta[0]}")
                 email_conta: str = input("Digite seu email: ").strip()
 
                 if verificar(email_cliente=email_conta):
@@ -83,7 +93,8 @@ def menu_inicial():
                 sessao.add(p)
                 sessao.commit() 
                 continuar_infinito(frase="---- CONTA CRIADA COM SUCESSO ----\n")
-                return
+                procura = sessao.execute(select(Banco).where(Banco.email==email_conta, Banco.senha==senha_conta)).scalar_one_or_none()
+                return procura, True
             
         elif escolha_inicial == 2:
             while True:
