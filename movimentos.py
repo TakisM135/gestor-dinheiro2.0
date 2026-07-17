@@ -6,9 +6,8 @@ from datetime import datetime
 
 def tipo(valor: float):
     while True:
-        tipo_escolha: str = continuar(print_continuar=f"---- ADICIONAR MOVIMENTO ----\nDigite um valor: {float(valor)}", pergunta="Digite o Tipo ['Gasto' ou 'Reccebido']: ", mostrar=True)
+        tipo_escolha: str = continuar(print_continuar=f"---- ADICIONAR MOVIMENTO ----\nDigite um valor: {float(valor)}", pergunta="Digite o Tipo ['Gasto' ou 'Recebido']: ", mostrar=True)
         if tipo_escolha.strip().title() not in ['Gasto', 'Recebido']:
-            continuar_infinito("---- NÃO ESTA NAS OPÇÕES ----\n")
             continue
         return tipo_escolha
     

@@ -21,11 +21,14 @@ def idade_insufeciente(email_cliente: str, idade_cliente: int):
     if email_procura is None and idade_cliente >= 18 and idade_cliente < 100:
         return False
     
-    if idade_cliente > 100:
+    if idade_cliente > 100 and idade_cliente < 1000:
         p = Emails_bloqueado(email=email_cliente, idade=idade_cliente, ano=datetime.now().year - idade_cliente)
         sessao.add(p)
         sessao.commit()
         continuar_infinito(frase=f"---- TENS MUITA IDADE (So podias criar conta com este email em: ({p.ano}) ----\n")
+        return
+    elif idade_cliente >= 1000:
+        return 1
     
     if email_procura is None:
         p = Emails_bloqueado(email=email_cliente, idade=idade_cliente, ano=(18 - idade_cliente) + datetime.now().year)
@@ -80,11 +83,11 @@ def menu_inicial():
                 email_conta: str = input("Digite seu email: ").strip()
 
                 if verificar(email_cliente=email_conta):
-                    return
+                    return "", False
             
                 idade_conta: int = pedir_idade(nome=nome_conta, email=email_conta)
                 if idade_conta == 1:
-                    continuar(print_continuar="\n---- NÃO TENS IDADE SUFECIENTE ----\n", pergunta="", mostrar=True, mostrar_pergunta=False)
+                    continuar(print_continuar="---- NÃO TENS IDADE SUFECIENTE ----\n", pergunta="", mostrar=True, mostrar_pergunta=False)
                     continue
 
                 senha_conta: str = input("Digite sua senha: ").strip()
@@ -115,7 +118,7 @@ def menu_inicial():
                 
         elif escolha_inicial == 3:
             continuar(print_continuar="\n---------- ADEUS ----------\n", pergunta="", mostrar=True, mostrar_pergunta=False)
-            return escolha_inicial, None
+            return escolha_inicial, False
         else:
             continuar(print_continuar="\n---- ESCOLHA ÍNDESPONIVEL ----\n", pergunta="Continuar [Y]: ".upper(), mostrar=True)
             continue
